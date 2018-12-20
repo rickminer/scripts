@@ -38,5 +38,7 @@ choco install varpanel -fy
 choco install wget -fy
 :: 7zip (Install)
 choco install 7zip.install -fy
+:: SUMo (lite)
+::choco install sumo -fy
 
 :: choco install <package_name> repeats for all the packages you want to install
