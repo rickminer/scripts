@@ -1,0 +1,20 @@
+Docker local tools
+Mozilla Observatory
+* docker run -t mozilla/observatory-cli <domain> --zero --format=report
+Mozilla TLS Observatory
+* docker run -it mozilla/tls-observatory tlsobs -hidePaths <domain>
+ZAProxy
+* docker run -t owasp/zap2docker-stable zap-baseline.py -t <URL>
+* docker run -i owasp/zap2docker-stable zap-cli quick-scan --self-contained --start-options '-config api.disablekey=true' <URL>
+PSHTT
+* pshtt [options] --json <domains> 
+SSLYZE
+* docker run --rm -it nablac0d3/sslyze --regular <HOST>[:<PORT>]
+--regular --http_headers
+--update_trust_stores
+
+:: Comands
+DOSKEY observatory-cli=docker run -t mozilla/observatory-cli --zero --format=report $*
+DOSKEY tls-obs=docker run -it mozilla/tls-observatory tlsobs -hidePaths $*
+DOSKEY sslyze=docker run --rm -it nablac0d3/sslyze $*
+
