@@ -1,0 +1,20 @@
+Metadata-Version: 1.2
+Name: yubikey-manager
+Version: 2.1.0
+Summary: Tool for managing your YubiKey configuration.
+Home-page: https://github.com/Yubico/yubikey-manager
+Author: Dain Nilsson
+Author-email: dain@yubico.com
+Maintainer: Yubico Open Source Maintainers
+Maintainer-email: ossmaint@yubico.com
+License: BSD 2 clause
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: X11 Applications :: Qt
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Topic :: Security :: Cryptography
+Classifier: Topic :: Utilities

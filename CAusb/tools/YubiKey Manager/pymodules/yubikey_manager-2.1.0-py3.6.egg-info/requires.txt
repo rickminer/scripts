@@ -1,0 +1,8 @@
+six
+pyscard
+pyusb
+click
+cryptography
+pyopenssl
+fido2
+pypiwin32
