@@ -1,15 +1,15 @@
 #Ignore everything in auth since those are for the CAs themselves
-CA_usb/auth/**
+CAusb/auth/**
 
 #Ignore everything in issued since those are the certificates that have been issued by this CA
-CA_usb/issued/**
+CAusb/issued/**
 
 #Ignore the current crl and crt files for this CA, the repository stores the tools not the current CA tree
-CA_usb/*.crl
-CA_usb/*.crt
+CAusb/*.crl
+CAusb/*.crt
 
 #Ignore random seed file
-CA_usb/tools/.rnd
+CAusb/tools/.rnd
 
 #Ignore archive exe
-CA_usb/*.exe
+CAusb/*.exe

@@ -1,0 +1,12 @@
+[autorun]
+icon=certificate-authority.ico
+label=NMFS Identity CA
+shell\neomanager\command=
+shell\neomanager=YubiKey NEO Manager
+shell\pivmanager\command=
+shell\pivmanager=YubiKey PIV Manager
+
+[Content]
+MusicFiles=no
+PictureFiles=no
+VideoFiles=no

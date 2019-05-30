@@ -1,0 +1,8 @@
+OpenSC Explorer version 0.15.0
+Usage: opensc-explorer [OPTIONS] [SCRIPT]
+Options:
+  -r, --reader <arg>            Uses reader number <arg> [0]
+  -c, --card-driver <arg>       Forces the use of driver <arg> [auto-detect]
+  -m, --mf <arg>                Selects path <arg> on start-up, or none if empty [3F00]
+  -w, --wait                    Wait for card insertion
+  -v, --verbose                 Verbose operation. Use several times to enable debug output.
