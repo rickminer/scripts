@@ -2,7 +2,7 @@
 
 * [Command-line Yubikey PIV tool (yubico-piv-tool)](https://developers.yubico.com/yubico-piv-tool/Releases/)
 * [YubiKey Manager](https://www.yubico.com/products/services-software/download/yubikey-manager/)
-* [YubiKey Personalization Tool (both GUI and commandline)](https://www.yubico.com/products/services-software/download/yubikey-personalization-tools/)
+* [YubiKey Personalization Tool](https://www.yubico.com/products/services-software/download/yubikey-personalization-tools/)
 * [7zip - LZMA SDK (7zr and 7zSD.sfx)](https://www.7-zip.org/download.html)
 * [Git tools (sed, dos2unix, cut, msys-intl-8.dll, msys-2.0.dll, msys-iconv-2.dll)](https://git-scm.com/download/win)
 * [LibreSSL](https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/)

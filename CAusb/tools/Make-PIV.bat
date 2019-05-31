@@ -92,17 +92,20 @@ IF /I "%SETUP%" EQU "N" GOTO END
 IF /I "%SETUP%" EQU "NO" GOTO END
 
 :INSERT
-ykinfo -s > nul 2>&1
+ykman info > nul 2>&1
 IF %ERRORLEVEL% GTR 0 ECHO Please insert Yubikey. && PAUSE && GOTO INSERT
 
-ykinfo -s -v
+ykman info
 
-:: Enable CCID
-ykpersonalize -m 6 -y
+:: Check current mode for NEO Yubikey
+FOR /F "tokens=2 delmis=:" %%X IN ('ykman mode') DO IF "%%X"==" OTP+FIDO+CCID" GOTO RESET
+:: Enable PIV mode for NEO yubikey
+ykman mode OTP+FIDO+CCID --force
 
 ECHO Remove and re-insert YubiKey. && PAUSE
 
 :: Reset the YubiKey NEO PIV applet
+:RESET
 yubico-piv-tool -a verify-pin -P 4711 2> nul
 yubico-piv-tool -a verify-pin -P 4711 2> nul
 yubico-piv-tool -a verify-pin -P 4711 2> nul
