@@ -42,7 +42,7 @@ PIN so-pin {
 	reference = 4
 }
 
-# CHV5 used for Oberthur's specifique access condition "PIN or SOPIN"
+# CHV5 used for Oberthur's specific access condition "PIN or SOPIN"
 # Any value for this pin can given, when the OpenSC tools are asking for.
 
 # Additional filesystem info.
@@ -66,7 +66,7 @@ filesystem {
 			
 				# Private RSA keys
 				EF OberthurAWP-private-key-info   {
-					ACL	 = WRITE=CHV1, UPDATE=CHV1, READ=CHV1;
+					ACL	 = WRITE=CHV1, UPDATE=CHV1, READ=NONE;
 				}
 				EF template-private-key {
 					file-id		= 3000;
@@ -78,19 +78,19 @@ filesystem {
 				
 				# Private DES keys
 				EF OberthurAWP-private-des-info   {
-					ACL	 = WRITE=CHV1, UPDATE=CHV1, READ=CHV1;
+					ACL	 = WRITE=CHV1, UPDATE=CHV1, READ=NONE;
 				}
 				EF template-private-des {
 					file-id	 = 4000;
 					type	= internal-ef;
 					size = 24;  # 192 bits
-					# READ acl used insted of DECRYPT/ENCRYPT/CHECKSUM
+					# READ acl used instead of DECRYPT/ENCRYPT/CHECKSUM
 					ACL = UPDATE=CHV1, READ=CHV1;
 				}
 			
 				# Private data
 				EF OberthurAWP-privdata-info   {
-					ACL = WRITE=CHV1, UPDATE=CHV1, READ=CHV1;
+					ACL = WRITE=CHV1, UPDATE=CHV1, READ=NONE;
 				}
 				EF  template-privdata {
 					file-id	 = 6000;
