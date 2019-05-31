@@ -1,12 +1,12 @@
 @ECHO OFF
 
 PUSHD %~dp0
-PATH %PATH%;%~dp0tools\bin;%~dp0tools;"%~dp0tools\YubiKey NEO Manager";"%~dp0tools\YubiKey PIV Manager";
+PATH %PATH%;%~dp0tools\bin;%~dp0tools;"%~dp0tools\YubiKey Manager";"%~dp0tools\YubiKey Personalization Tool";
 SETLOCAL
 
 :: Setup DOSKEY aliases
-DOSKEY Setup-NEO="neoman.exe"
-DOSKEY Manage-PIV="pivman.exe"
+DOSKEY Setup-YubiKey="yubikey-personalization-gui.exe"
+DOSKEY Manage-PIV="ykman-gui.exe"
 
 ECHO.
 ECHO ##################################################
@@ -22,9 +22,8 @@ ECHO.
 ECHO.
 :: Call the usage information for all of the batch files, put the batch file name as the first argument
 FOR /F %%I IN ('DIR /B \tools\*-*.bat') DO CALL :USAGE %%I
-ECHO Usage: Setup-NEO
-ECHO     This tool allows for turning on the CCID of
-ECHO     the YubiKey NEO allowing for smartcard use.
+ECHO Usage: Setup-YubiKey
+ECHO     This tool runs the personalization tool.
 ECHO.
 ECHO Usage: Manage-PIV
 ECHO     This tool provides a graphical way to see and
