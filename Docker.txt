@@ -27,7 +27,7 @@ function New-BashStyleAlias([string]$name, [string]$command)
 New-BashStyleAlias Scan-Sslyze 'docker run --rm -it nablac0d3/sslyze --regular @args'
 New-BashStyleAlias Scan-Pshtt 'pshtt --json @args'
 New-BashStyleAlias Scan-ZapBaseline 'docker run --rm -t owasp/zap2docker-weekly zap-baseline.py -t @args'
-New-BashStyleAlias Scan-ZapBaseline 'docker run --rm -t owasp/zap2docker-weekly zap-full-scan.py -t @args'
+New-BashStyleAlias Scan-ZapFull 'docker run --rm -t owasp/zap2docker-weekly zap-full-scan.py -t @args'
 New-BashStyleAlias Scan-ZapMassScan 'docker run -u zap -it rick.miner/mass-baseline mass-baseline.sh'
 
 docker run --rm -it nablac0d3/sslyze --regular inport.nmfs.noaa.gov
