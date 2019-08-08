@@ -17,4 +17,42 @@ SSLYZE
 DOSKEY observatory-cli=docker run -t mozilla/observatory-cli --zero --format=report $*
 DOSKEY tls-obs=docker run -it mozilla/tls-observatory tlsobs -hidePaths $*
 DOSKEY sslyze=docker run --rm -it nablac0d3/sslyze $*
+code $profile
+function New-BashStyleAlias([string]$name, [string]$command)
+{
+    $sb = [scriptblock]::Create($command)
+    New-Item "Function:\global:$name" -Value $sb | Out-Null
+}
+
+New-BashStyleAlias Scan-Sslyze 'docker run --rm -it nablac0d3/sslyze --regular @args'
+New-BashStyleAlias Scan-Pshtt 'pshtt --json @args'
+New-BashStyleAlias Scan-ZapBaseline 'docker run --rm -t owasp/zap2docker-weekly zap-baseline.py -t @args'
+New-BashStyleAlias Scan-ZapBaseline 'docker run --rm -t owasp/zap2docker-weekly zap-full-scan.py -t @args'
+New-BashStyleAlias Scan-ZapMassScan 'docker run -u zap -it rick.miner/mass-baseline mass-baseline.sh'
+
+docker run --rm -it nablac0d3/sslyze --regular inport.nmfs.noaa.gov
+
+docker run --rm -it mozilla/tls-observatory tlsobs <DOMAIN>
+
+# https://github.com/zaproxy/zaproxy/wiki/Docker
+# or use owasp/zap2docker-weekly (every week)
+# or owasp/zap2docker-live (latest changes)
+docker run --rm -t owasp/zap2docker-stable zap-baseline.py -t https://www.example.com
+docker run --rm -t owasp/zap2docker-stable zap-full-scan.py -t https://www.example.com
+
+## Massbaseline:
+https://blog.mozilla.org/security/2017/01/25/setting-a-baseline-for-web-security-controls/
+## Download files
+## Edit mass-baseline.sh
+## Edit docker-wrapper
+docker build -t your-user/mass-baseline -f docker-wrapper .
+docker run -u zap -i -t your-user/mass-baseline mass-baseline.sh
+
+
+HQCIOL1667139\docker
+RUMtWG$BUd6&*#MeUFDj
+
+#After reboot
+Add-LocalGroupMember -Group Administrators docker
+Set-NetConnectionProfile -interfacealias "vEthernet (DockerNAT)" -NetworkCategory Private
 
