@@ -57,3 +57,5 @@ RUMtWG$BUd6&*#MeUFDj
 Add-LocalGroupMember -Group Administrators docker
 Set-NetConnectionProfile -interfacealias "vEthernet (DockerNAT)" -NetworkCategory Private
 
+#Commando VM
+https://github.com/fireeye/commando-vm
