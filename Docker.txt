@@ -14,6 +14,9 @@ SSLYZE
 --regular --http_headers
 --update_trust_stores
 
+DOMAIN-SCAN (Local)
+python .\scan --scan=pshtt,sslyze --meta .\nmfs-domains.csv
+
 :: Comands
 DOSKEY observatory-cli=docker run -t mozilla/observatory-cli --zero --format=report $*
 DOSKEY tls-obs=docker run -it mozilla/tls-observatory tlsobs -hidePaths $*
