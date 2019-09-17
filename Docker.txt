@@ -13,6 +13,8 @@ SSLYZE
 * docker run --rm -it nablac0d3/sslyze --regular <HOST>[:<PORT>]
 --regular --http_headers
 --update_trust_stores
+HTTPIE
+* docker run --rm -it alpine/httpie --follow --all --print=h http://<HOST>
 
 DOMAIN-SCAN (Local)
 python .\scan --scan=pshtt,sslyze --meta .\nmfs-domains.csv
@@ -33,6 +35,7 @@ New-BashStyleAlias Scan-Pshtt 'pshtt --json @args'
 New-BashStyleAlias Scan-ZapBaseline 'docker run --rm -t owasp/zap2docker-weekly zap-baseline.py -t @args'
 New-BashStyleAlias Scan-ZapFull 'docker run --rm -t owasp/zap2docker-weekly zap-full-scan.py -t @args'
 New-BashStyleAlias Scan-ZapMassScan 'docker run -u zap -it rick.miner/mass-baseline mass-baseline.sh'
+New-BashStyleAlias Scan-Httpie 'docker run --rm -it alpine/httpie --follow --all --print=h @args'
 
 docker run --rm -it nablac0d3/sslyze --regular inport.nmfs.noaa.gov
 
