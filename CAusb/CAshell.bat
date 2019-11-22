@@ -21,7 +21,7 @@ ECHO CA. Below is a summary of the tools available.
 ECHO.
 ECHO.
 :: Call the usage information for all of the batch files, put the batch file name as the first argument
-FOR /F %%I IN ('DIR /B \tools\*-*.bat') DO CALL :USAGE %%I
+FOR /F %%I IN ('DIR /B %~dp0\tools\*-*.bat') DO CALL :USAGE %%I
 ECHO Usage: Setup-YubiKey
 ECHO     This tool runs the personalization tool.
 ECHO.
