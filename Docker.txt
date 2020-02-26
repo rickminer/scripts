@@ -65,3 +65,7 @@ Set-NetConnectionProfile -interfacealias "vEthernet (DockerNAT)" -NetworkCategor
 
 #Commando VM
 https://github.com/fireeye/commando-vm
+
+#Parrot OS 
+docker pull parrotsec/parrot
+docker run -it --network host parrotsec/parrot
