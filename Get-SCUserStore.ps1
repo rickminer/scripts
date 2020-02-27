@@ -148,9 +148,3 @@ $SCInfo = [PSCustomObject]@{
     Issuer = $ISSUER
 }
 Export-Csv -append -NoTypeInformation -Path CAC.csv -InputObject $SCInfo
-
-$Cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-
-cd $env:APPDATA\Microsoft\SystemCertificates\My\Certificates
-$Cert.Import((Get-Item "FILE").FullName)
-$cert | fl *
