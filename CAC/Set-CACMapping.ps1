@@ -11,7 +11,7 @@ function ReverseDN {
     return $arDN -join ","
 }
 function Set-CACMapping {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     Param(
         [Parameter(ValueFromPipeline,Mandatory=$true)]
         [ValidateScript({Test-Path $_ -PathType 'Leaf'})]
@@ -46,9 +46,11 @@ function Set-CACMapping {
             $certs = @($cert)
         }
         $aduser.AltSecurityIdentities = $certs
-        #Set-ADUser -Instance $ADUser #Add for specifying the DC -Server $DC
+        if( $PSCmdlet.ShouldProcess($_.Username,"Set CAC Mapping to $($certs)") ){
+            Set-ADUser -Instance $ADUser #Add for specifying the DC -Server $DC
+        }
 
     }
 }
 
-Set-CACMapping -PATH ".\CAC.csv"
+Set-CACMapping -PATH ".\CAC.csv" -WhatIf
