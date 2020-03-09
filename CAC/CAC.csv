@@ -1,4 +1,0 @@
-UPN,Email,Username,DistinguishedName,Computer,Subject,Issuer
-1398604519113302@mil,"rick.miner@noaa.gov",NMFS\Rick.Miner.PC,"CN=Rick.Miner.PC,OU=HQ CAC Required,OU=Active,OU=Users,OU=Infrastructure,OU=HQ,OU=_NMFS,DC=nmfs,DC=local",HQCIOL1667139,"CN=MINER.RICHARD.SCOTT.1398604519, OU=OTHER, OU=PKI, OU=DoD, O=U.S. Government, C=US","CN=DOD ID CA-52, OU=PKI, OU=DoD, O=U.S. Government, C=US"
-,,Rick.Miner.PC,"CN=Rick.Miner.PC,OU=HQ CAC Required,OU=Active,OU=Users,OU=Infrastructure,OU=HQ,OU=_NMFS,DC=nmfs,DC=local",HQCIOL1667139,,
-1398604519113302@mil,"rick.miner@noaa.gov",Rick.Miner,"CN=Rick.Miner,OU=HQ CAC Required,OU=Active,OU=Users,OU=Infrastructure,OU=HQ,OU=_NMFS,DC=nmfs,DC=local",HQCIOL1667139,"CN=MINER.RICHARD.SCOTT.1398604519, OU=OTHER, OU=PKI, OU=DoD, O=U.S. Government, C=US","CN=DOD ID CA-52, OU=PKI, OU=DoD, O=U.S. Government, C=US"
