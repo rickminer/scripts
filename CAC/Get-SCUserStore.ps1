@@ -143,7 +143,7 @@ $SCInfo = [PSCustomObject]@{
     UPN = $UPN
     Email = $EMAIL
     Username = ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)
-    DistinguishedName = (Get-ADUser $env:USERNAME).DistinguishedName
+    DistinguishedName = ([adsisearcher]'($(objectClass=user)(sAMAccountName=$(Get-ADUser $env:USERNAME)').FindOne.Properties.distinguishedname
     Computer = $env:ComputerName
     Subject = $SUBJECT
     Issuer = $ISSUER
