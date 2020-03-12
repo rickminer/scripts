@@ -33,15 +33,15 @@ function Get-FileCerts {
         }
 
         $CertInfo = [PSCustomObject]@{
+            DistinguishedName = $_.DistinguishedName
             Username = $_.Username
             Email = $EMAIL
-            DistinguishedName = $_.DistinguishedName
             Computer = $_.ComputerName
             UPN = $UPN
             Subject = $SUBJECT
             Issuer = $ISSUER
         }
-        Write-Output $CertInfo
+        if( $ISSUER ) { Write-Output $CertInfo }
         if( $UPN ) { Clear-Variable UPN }
         if( $EMAIL ) { Clear-Variable EMAIL }
         if( $SUBJECT ) { Clear-Variable SUBJECT}
