@@ -1,0 +1,52 @@
+# Scanning
+Asset: Active Endpoints (days since observation less than 31)
+Plugin ID: 19506,110095,110385,117885,104410,110723
+Plugin Type: Active
+
+Compliant:
+Vulnerability Last Observed: Between 0-14 days ago (pass), 14-31 days (fail)
+
+# Authentication
+Asset: ( ( "Authentication Capable" AND ( NOT "S&T - NOAA4020" AND NOT "HQ Authentication Exempt" ) ) AND NOT "Domain Controllers (Static)" )
+Vulnerability Last Observed: 0-14 days
+Plugin ID: 110095,110385,117885,104410,110723
+
+Compliant:
+Plugin ID: 110095,110385,117885 (pass), 104410,110723 (fail)
+
+
+# Old Vulnerabilities
+Plugin Type: Active
+Vulnerability Last Observed: Between 0-14 days ago
+
+Compliant:
+Severity: High, Critical
+Vulnerability Discovered: More than 30 days ago (fail)
+
+
+# Old Patches
+Plugin Type: Active
+Vulnerability Last Observed: Between 0-14 days ago
+
+Compliant:
+Severity: High, Critical
+Patch Published: More than 30 days ago (fail)
+
+
+# Unsupported
+Plugin Type: Active
+Severity: High, Critical
+Vulnerability Last Observed: Between 0-14 days ago
+
+Compliant:
+Plugin Name: Contains unsupported (fail)
+
+
+
+# Authentication Troubleshooting
+Plugin ID: 19506,11936,12634,21745,10394,24786,26917,66359,104410,110723
+
+https://www.schemecolor.com/red-green-amber-colors.php
+Red:    #D2222D
+Yellow: #FFBF00
+Green:  #238823
