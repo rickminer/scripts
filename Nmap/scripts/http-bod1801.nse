@@ -905,7 +905,7 @@ end
 local function check_hostname(hostname, cn, san)
     if hostname:match(cn:gsub("%.",'%%.'):gsub("*",".+")) then return true end
     if not san then return false end
-    for name in san:gmatch("DNS:(.-),") do
+    for type, name in san:gmatch("(DNS):([^,]+)") do
         if hostname:match(name:gsub("%.",'%%.'):gsub("*",".+")) then return true end
     end
     return false
