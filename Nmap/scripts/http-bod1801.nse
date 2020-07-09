@@ -13,6 +13,7 @@ local sslcert = require "sslcert"
 local sslv2 = require "sslv2"
 
 description = [[
+This plugin is a combination of sslv2, ssl-enum-ciphers, http-headers. They have been combined and filtered to show compliance with BOD 18-01. Adding -v will show the needed information to troubleshoot any compliance issues. This plugin will struggle with any sites that require a client certificate, but it will still show the certificate and TLS ciphers.
 Checks for BOD 18-01 Web compliance:
 
 * HTTPS Only (with redirects)
@@ -24,26 +25,39 @@ Checks for BOD 18-01 Web compliance:
 
 ---
 -- @usage
--- nmap -p <port> --script http-bod1801 <target>
+-- nmap -p 80,443 --script http-bod1801 <target>
 --
 -- @output
--- 80/tcp open  http    syn-ack
--- | http-security-headers:
--- |   Strict_Transport_Security:
--- |     Header: Strict-Transport-Security: max-age=15552000; preload
+-- 80/tcp  open  http
+-- | http-bod1801:
+-- |   BOD1801_Results:
+-- |     Redirect: COMPLIANT.
+-- |     HSTS: COMPLAINT
+-- |_    Certificate: COMPLIANT
+-- 443/tcp open  https
+-- | http-bod1801:
+-- |   BOD1801_Results:
+-- |     Redirect: UNKNOWN, check HTTP port.
+-- |     Ciphers: COMPLIANT
+-- |     HSTS: COMPLAINT
+-- |_    Certificate: COMPLIANT
 --
 --
 -- @xmloutput
--- <table key="Strict_Transport_Policy">
--- <elem>Header: Strict-Transport-Security: max-age=31536000</elem>
+-- <ports><port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="51"/><service name="http" method="table" conf="3"/><script id="http-bod1801" output="&#xa;  BOD1801_Results: &#xa;    Redirect: COMPLIANT.&#xa;    HSTS: COMPLAINT&#xa;    Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov"><table key="BOD1801_Results">
+-- <elem>Redirect: COMPLIANT.</elem>
+-- <elem>HSTS: COMPLAINT</elem>
+-- <elem>Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov</elem>
 -- </table>
--- <table key="Public_Key_Pins_Report_Only">
--- <elem>Header: Public-Key-Pins-Report-Only: pin-sha256="d6qzRu9zOECb90Uez27xWltNsj0e1Md7GkYYkVoZWmM="; report-uri="http://example.com/pkp-report"; max-age=10000; includeSubDomains</elem>
+-- </script></port>
+-- <port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="52"/><service name="https" method="table" conf="3"/><script id="http-bod1801" output="&#xa;  BOD1801_Results: &#xa;    Redirect: UNKNOWN, check HTTP port.&#xa;    Ciphers: COMPLIANT&#xa;    HSTS: COMPLAINT&#xa;    Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov"><table key="BOD1801_Results">
+-- <elem>Redirect: UNKNOWN, check HTTP port.</elem>
+-- <elem>Ciphers: COMPLIANT</elem>
+-- <elem>HSTS: COMPLAINT</elem>
+-- <elem>Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov</elem>
 -- </table>
--- <table key="X_Frame_Options">
--- <elem>Header: X-Frame-Options: DENY</elem>
--- <elem>Description: The browser must not display this content in any frame.</elem>
--- </table>
+-- </script></port>
+-- </ports>
 --
 -- @args http-security-headers.path The URL path to request. The default path is "/".
 ---
