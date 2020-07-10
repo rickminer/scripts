@@ -1,5 +1,6 @@
 local http = require "http"
 local shortport = require "shortport"
+local datetime = require "datetime"
 local stdnse = require "stdnse"
 local table = require "table"
 local string = require "string"
@@ -903,10 +904,10 @@ local function name_to_table(name)
 end
 
 local function check_hostname(hostname, cn, san)
-    if hostname:match(cn:gsub("%.",'%%.'):gsub("*",".+")) then return true end
+    if hostname:match(cn:gsub("%.",'%%.'):gsub("%-",'%%-'):gsub("*",".+")) then return true end
     if not san then return false end
     for type, name in san:gmatch("(DNS):([^,]+)") do
-        if hostname:match(name:gsub("%.",'%%.'):gsub("*",".+")) then return true end
+        if hostname:match(name:gsub("%.",'%%.'):gsub("%-",'%%-'):gsub("*",".+")) then return true end
     end
     return false
 end
@@ -957,7 +958,7 @@ local function output_tab(cert)
         if type(v)=="string" then
         o.validity[k] = v
         else
-        o.validity[k] = stdnse.format_timestamp(v)
+        o.validity[k] = datetime.format_timestamp(v)
         end
     end
     return o
@@ -1162,7 +1163,7 @@ action = function(host, port)
             error_str = error_str .. ", hostname mismatch: " .. cert.subject
         end
         local expire = makeTimeStamp(cert.validity.notAfter)
-        if expire - os.time() < 0 then error_str = error_str .. ", expired certificate: " .. expire end
+        if expire - os.time() < 0 then error_str = error_str .. ", expired certificate: " .. datetime.format_timestamp(expire) end
         if error_str:len() > 0 then
             table.insert(output_info.BOD1801_Results, "Certificate: FAILED" .. error_str)
         else
