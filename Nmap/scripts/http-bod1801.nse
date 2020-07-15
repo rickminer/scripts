@@ -33,28 +33,28 @@ Checks for BOD 18-01 Web compliance:
 -- | http-bod1801:
 -- |   BOD1801_Results:
 -- |     Redirect: COMPLIANT.
--- |     HSTS: COMPLAINT
+-- |     HSTS: COMPLIANT
 -- |_    Certificate: COMPLIANT
 -- 443/tcp open  https
 -- | http-bod1801:
 -- |   BOD1801_Results:
 -- |     Redirect: UNKNOWN, check HTTP port.
 -- |     Ciphers: COMPLIANT
--- |     HSTS: COMPLAINT
+-- |     HSTS: COMPLIANT
 -- |_    Certificate: COMPLIANT
 --
 --
 -- @xmloutput
--- <ports><port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="51"/><service name="http" method="table" conf="3"/><script id="http-bod1801" output="&#xa;  BOD1801_Results: &#xa;    Redirect: COMPLIANT.&#xa;    HSTS: COMPLAINT&#xa;    Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov"><table key="BOD1801_Results">
+-- <ports><port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="51"/><service name="http" method="table" conf="3"/><script id="http-bod1801" output="&#xa;  BOD1801_Results: &#xa;    Redirect: COMPLIANT.&#xa;    HSTS: COMPLIANT&#xa;    Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov"><table key="BOD1801_Results">
 -- <elem>Redirect: COMPLIANT.</elem>
--- <elem>HSTS: COMPLAINT</elem>
+-- <elem>HSTS: COMPLIANT</elem>
 -- <elem>Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov</elem>
 -- </table>
 -- </script></port>
--- <port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="52"/><service name="https" method="table" conf="3"/><script id="http-bod1801" output="&#xa;  BOD1801_Results: &#xa;    Redirect: UNKNOWN, check HTTP port.&#xa;    Ciphers: COMPLIANT&#xa;    HSTS: COMPLAINT&#xa;    Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov"><table key="BOD1801_Results">
+-- <port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="52"/><service name="https" method="table" conf="3"/><script id="http-bod1801" output="&#xa;  BOD1801_Results: &#xa;    Redirect: UNKNOWN, check HTTP port.&#xa;    Ciphers: COMPLIANT&#xa;    HSTS: COMPLIANT&#xa;    Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov"><table key="BOD1801_Results">
 -- <elem>Redirect: UNKNOWN, check HTTP port.</elem>
 -- <elem>Ciphers: COMPLIANT</elem>
--- <elem>HSTS: COMPLAINT</elem>
+-- <elem>HSTS: COMPLIANT</elem>
 -- <elem>Certificate: FAILED, hostname mismatch: *.darrp.noaa.gov</elem>
 -- </table>
 -- </script></port>
@@ -67,8 +67,18 @@ author = {"Rick Miner"}
 license = "Same as Nmap--See https://nmap.org/book/man-legal.html"
 categories = {"discovery", "intrusive"}
 
-local is_ssl = false
-local certificate
+-- GLOBAL VARIABLES -- 
+local is_ssl = false -- GLOBAL ssl check variable
+local certificate -- Storing the certificate for later use
+-- Test at most this many ciphersuites at a time.
+-- http://seclists.org/nmap-dev/2012/q3/156
+-- http://seclists.org/nmap-dev/2010/q1/859
+local CHUNK_SIZE = 64
+local have_ssl, openssl = pcall(require,'openssl')
+
+-- RULES --
+postrule = function() return (nmap.registry.BOD1801 ~= nil) end
+
 portrule = function (host, port)
     local is_http = shortport.http
     if shortport.ssl(host, port) or sslcert.getPrepareTLSWithoutReconnect(port) then
@@ -109,12 +119,15 @@ portrule = function (host, port)
     return is_http
   end
 
-
--- Test at most this many ciphersuites at a time.
--- http://seclists.org/nmap-dev/2012/q3/156
--- http://seclists.org/nmap-dev/2010/q1/859
-local CHUNK_SIZE = 64
-local have_ssl, openssl = pcall(require,'openssl')
+-- FUNCTIONS
+--- put finding in the nmap registry for usage by other scripts
+--@param host nmap host table
+--@param key host key table
+local add_value_to_registry = function( host, check, value )
+  nmap.registry.BOD1801 = nmap.registry.BOD1801 or {}
+  nmap.registry.BOD1801[stdnse.get_hostname(host)] = nmap.registry.BOD1801[stdnse.get_hostname(host)] or {}
+  nmap.registry.BOD1801[stdnse.get_hostname(host)][check] = value
+end
 
 -- Add additional context (protocol) to debug output
 local function ctx_log(level, protocol, fmt, ...)
@@ -920,25 +933,25 @@ local function makeTimeStamp(dateString)
 end
 
 local function getCertificate(host, port)
-    if certificate then
-        return true, certificate
-    else
-        -- This uses a host and port string, NOT the ones provided
-        local s = nmap.new_socket()
-        local status, error = s:connect(host, port, "ssl")
-        local cert = nil
-        if status then
-            cert = s:get_ssl_certificate()
-        else
-            return false, "Failed to connect: " .. error
-        end
+  if certificate then
+      return true, certificate
+  else
+      -- This uses a host and port string, NOT the ones provided
+      local s = nmap.new_socket()
+      local status, error = s:connect(host, port, "ssl")
+      local cert = nil
+      if status then
+          cert = s:get_ssl_certificate()
+      else
+          return false, "Failed to connect: " .. error
+      end
 
-        if cert == nil then
-            return false, "Failed to get cert."
-        else
-            return true, cert
-        end
-    end
+      if cert == nil then
+          return false, "Failed to get cert."
+      else
+          return true, cert
+      end
+  end
 end
 
 local function output_tab(cert)
@@ -964,7 +977,63 @@ local function output_tab(cert)
     return o
 end
 
-action = function(host, port)
+function handle_redirect(host, port, path, options)
+  local counter = 10
+  local response, locations
+  local u = { host = host, port = port, path = path }
+  local options = {redirect_ok=0}
+  repeat
+    stdnse.debug1(string.format("URL path is %s.", u.path))
+    response = http.get(u.host, u.port, u.path, options)
+    stdnse.debug1(string.format("Status is %s.", trim(response["status-line"])))
+    u = parse_redirect(u.host, u.port, u.path, response, options)
+    if( not(u) ) then
+      break
+    end
+    stdnse.debug1(string.format("Redirect is %s.", response.header.location))
+    options.scheme = u.scheme or options.scheme
+    locations = locations or {}
+    table.insert(locations, url.build(u))
+    stdnse.debug1(string.format("Locations added %s.", url.build(u)))
+    counter = counter - 1
+  until( counter <= 0 )
+  response.location = locations
+  return response
+end
+
+--- Handles a HTTP redirect
+-- @param host table as received by the script action function
+-- @param port table as received by the script action function
+-- @param path string
+-- @param response table as returned by http.get or http.head
+-- @return url table as returned by <code>url.parse</code> or nil if there's no
+--         redirect taking place
+function parse_redirect(host, port, path, response, options)
+  if ( not(tostring(response.status):match("^30[01237]$")) or
+       not(response.header) or
+       not(response.header.location) ) then
+    return nil
+  end
+  port = ( "number" == type(port) ) and { number = port } or port
+  local u = url.parse(response.header.location)
+  if ( not(u.host) ) then
+    -- we're dealing with a relative url
+    u.host = stdnse.get_hostname(host)
+    u.scheme = options.scheme
+  end
+  -- do port fixup
+  u.port = u.port or url.get_default_port(u.scheme) or port.number
+  if ( not(u.path) ) then
+    u.path = "/"
+  end
+  u.path = url.absolute(path, u.path)
+  if ( u.query ) then
+    u.path = ("%s?%s"):format( u.path, u.query )
+  end
+  return u
+end
+
+portaction = function(host, port)
     local path = stdnse.get_script_args(SCRIPT_NAME .. ".path") or "/"
     local response
     local result
@@ -972,66 +1041,63 @@ action = function(host, port)
     local uri
     local hsts
     local output_info = {}
-    local req_opt = {redirect_ok=function(host,port)
-        local c = 5
-        return function(uri)
-        if ( c==0 ) then return false end
-        c = c - 1
-        return true
-        end
-    end}
+    local hostID = host.targetname or host.ip
+    local locations = {}
 
-    result = http.get(host, port, path)
+    result = http.get(host, port, path, {redirect_ok=0})
+    stdnse.debug1(string.format("Initial request to %s.", url.build({host=stdnse.get_hostname(host), port=port.number, path=path})))
 
     output_info = stdnse.output_table()
     output_info.BOD1801_Results = {}
 
     if is_ssl then
-        table.insert(output_info.BOD1801_Results, "Redirect: UNKNOWN, check HTTP port.")
+      table.insert(output_info.BOD1801_Results, "Redirect: UNKNOWN, check HTTP port.")
+      add_value_to_registry(host, "HTTPS", "COMPLIANT")
+      if tostring( result.status ):match( "30%d" ) and result.header and result.header.location then
+        response =  handle_redirect(host, port, path, {redirect_ok=10})
+        local l = response.location
+        uri = url.parse(l[#l])
+      else
         response = result
-        if host.targetname then
-            uri = url.parse("https://" .. host.targetname .. ":" .. port.number .. path)
-        else
-            uri = url.parse("https://" .. host.ip .. ":" .. port.number .. path)
-        end
+        uri = url.parse("https://" .. stdnse.get_hostname(host) .. ":" .. port.number .. path)
+      end
     else
-        -- check for a redirect
-        if nmap.verbosity() > 1 then
-            output_info.Redirect_Info = {}
-            table.insert(output_info.Redirect_Info, "HTTP Status: " .. trim(result["status-line"]))
-        end
-        if tostring( result.status ):match( "30%d" ) and result.header and result.header.location then
-            -- This is a 30x redirect
-            response = http.get(host, port, path, req_opt)
-            if not (response and response.status) then
-                table.insert(output_info.BOD1801_Results, "Redirect: FAILED, redirect failed. Could not connect to " .. result.header.location)
-                if host.targetname then
-                    uri = url.parse("https://" .. host.targetname .. ":" .. port.number .. path)
-                else
-                    uri = url.parse("https://" .. host.ip .. ":" .. port.number .. path)
-                end
-            else
-                locations = response.location
-                if nmap.verbosity() > 1 then output_info.Redirect_Info.Locations = locations end
-                uri = url.parse( locations[#locations] )
-                if uri.scheme == "https" then
-                    if uri.port == nil then uri.port = "443" end
-                    table.insert(output_info.BOD1801_Results, "Redirect: COMPLIANT.")
-                else
-                    if uri.port == nil then uri.port = "80" end
-                    table.insert(output_info.BOD1801_Results, "Redirect: FAILED, redirect not HTTPS.")
-                end
-            end
-        else
-            -- This is not a redirect
-            table.insert(output_info.BOD1801_Results, "Redirect: FAILED, not 301/302 redirect: " .. result.status)
-            response = result
-            if host.targetname then
-                uri = url.parse("https://" .. host.targetname .. ":" .. port.number .. path)
-            else
-                uri = url.parse("https://" .. host.ip .. ":" .. port.number .. path)
-            end
-        end
+      add_value_to_registry(host, "HTTP", "EXISTS")
+      -- check for a redirect
+      if nmap.verbosity() > 1 then
+          output_info.Redirect_Info = {}
+          table.insert(output_info.Redirect_Info, "HTTP Status: " .. trim(result["status-line"]))
+      end
+      if tostring( result.status ):match( "30%d" ) and result.header and result.header.location then
+          -- This is a 30x redirect
+          response = handle_redirect(host, port, path, {redirect_ok=10})
+          if not (response and response.status) then
+              table.insert(output_info.BOD1801_Results, "Redirect: FAILED, redirect failed. Could not connect to " .. result.header.location)
+              add_value_to_registry(host, "Redirect", "FAILED")
+              uri = url.parse("https://" .. stdnse.get_hostname(host) .. ":" .. port.number .. path)
+          else
+              locations = response.location
+              stdnse.debug1(string.format("Result Header to %s.", trim(result["status-line"])))
+              stdnse.debug1(string.format("Redirected to %s.", table.concat(locations, ", ")))
+              if nmap.verbosity() > 1 then output_info.Redirect_Info.Locations = locations end
+              uri = url.parse( locations[#locations] )
+              if uri.scheme == "https" then
+                  if uri.port == nil then uri.port = "443" end
+                  table.insert(output_info.BOD1801_Results, "Redirect: COMPLIANT.")
+                  add_value_to_registry(host, "Redirect", "COMPLIANT")
+              else
+                  if uri.port == nil then uri.port = "80" end
+                  table.insert(output_info.BOD1801_Results, "Redirect: FAILED, redirect not HTTPS.")
+                  add_value_to_registry(host, "Redirect", "FAILED")
+              end
+          end
+      else
+          -- This is not a redirect
+          table.insert(output_info.BOD1801_Results, "Redirect: FAILED, not 301/302 redirect: " .. result.status)
+          add_value_to_registry(host, "Redirect", "FAILED")
+          response = result
+          uri = url.parse("https://" .. stdnse.get_hostname(host) .. ":" .. port.number .. path)
+      end
     end
 
     if not (response and response.status) then
@@ -1039,7 +1105,7 @@ action = function(host, port)
     end
 
     -- Check Ciphers and get certificate
-    if shortport.ssl(host,port) then
+    if shortport.ssl(host,port) and is_ssl then
         -- Get Cipher information
         if not have_ssl then
             stdnse.verbose("OpenSSL not available; some cipher scores will be marked as unknown.")
@@ -1050,6 +1116,7 @@ action = function(host, port)
         local condvar = nmap.condvar(results)
         local threads = {}
 
+        -- Try SSLv3, TLS protocols; SSLv2 will come later
         for name, _ in pairs(tls.PROTOCOLS) do
             stdnse.debug1("Trying protocol %s.", name)
             local co = stdnse.new_thread(try_protocol, host, port, name, results)
@@ -1120,8 +1187,10 @@ action = function(host, port)
 
         if issues:len() > 0 then
             table.insert(output_info.BOD1801_Results, "Ciphers: FAILED, " .. issues)
+            add_value_to_registry(host, "Ciphers", "FAILED")
         else
             table.insert(output_info.BOD1801_Results, "Ciphers: COMPLIANT")
+            add_value_to_registry(host, "Ciphers", "COMPLIANT")
         end
         if nmap.verbosity() > 1 then
             output_info.Cipher_Info = {}
@@ -1137,12 +1206,15 @@ action = function(host, port)
         end
         hsts = tonumber(string.match(response.header['strict-transport-security'], "%d+"))
         if hsts >= 31536000 then
-            table.insert(output_info.BOD1801_Results, "HSTS: COMPLAINT")
+            table.insert(output_info.BOD1801_Results, "HSTS: COMPLIANT")
+            add_value_to_registry(host, "HSTS", "COMPLIANT")
         else
             table.insert(output_info.BOD1801_Results, "HSTS: " .. hsts .. " is too short, 31536000 is min")
+            add_value_to_registry(host, "HSTS", "FAILED")
         end
     elseif shortport.ssl(host,port) then
         table.insert(output_info.BOD1801_Results, "HSTS: FAILED, not configured.")
+        add_value_to_registry(host, "HSTS", "FAILED")
         if nmap.verbosity() > 1 then
             output_info.HSTS_Info = {}
             table.insert(output_info.HSTS_Info, "HSTS not configured on HTTPS Server.")
@@ -1159,15 +1231,17 @@ action = function(host, port)
     else
         cert = output_tab(cert)
         local error_str = ""
-        if not(check_hostname(uri.authority, cert.subject, cert.subject_alternative_name)) then
+        if not(check_hostname(uri.host, cert.subject, cert.subject_alternative_name)) then
             error_str = error_str .. ", hostname mismatch: " .. cert.subject
         end
         local expire = makeTimeStamp(cert.validity.notAfter)
         if expire - os.time() < 0 then error_str = error_str .. ", expired certificate: " .. datetime.format_timestamp(expire) end
         if error_str:len() > 0 then
             table.insert(output_info.BOD1801_Results, "Certificate: FAILED" .. error_str)
+            add_value_to_registry(host, "Cert", "FAILED")
         else
             table.insert(output_info.BOD1801_Results, "Certificate: COMPLIANT")
+            add_value_to_registry(host, "Cert", "COMPLIANT")
         end
         if nmap.verbosity() > 1 then
             output_info.Certificate_Info = {}
@@ -1179,3 +1253,62 @@ action = function(host, port)
 
 end
 
+postaction = function()
+  local out = {}
+  table.insert(out, "Host: Overall,HTTPS,HSTS,CIPHER")
+  -- create a reverse mapping key_fingerprint -> host(s)
+  for host, checks in pairs(nmap.registry.BOD1801) do
+    stdnse.debug1(string.format("Host is %s.", host))
+    stdnse.debug1(string.format("HTTP is %s.", checks.HTTP))
+    stdnse.debug1(string.format("HTTPS is %s.", checks.HTTPS))
+    stdnse.debug1(string.format("Cert is %s.", checks.Cert))
+    stdnse.debug1(string.format("Redirect is %s.", checks.Redirect))
+    stdnse.debug1(string.format("HSTS is %s.", checks.HSTS))
+    stdnse.debug1(string.format("Ciphers is %s.", checks.Ciphers))
+    local overall
+    local https
+    local redirect
+    -- www.example.com: OVERALL,HTTPS,HSTS,CIPHER
+    -- Overall = HTTPS, HSTS, Cipher
+    -- Redirect = if HTTP, then Redirect
+    -- HTTPS = Cert, HTTPS, and Redirect
+    -- HSTS
+    -- Cipher
+    if checks.HTTP == "EXISTS" then
+      -- There is an HTTP server
+      if checks.Redirect == "COMPLIANT" then
+        redirect = true
+      else
+        redirect = false
+      end
+    else
+      -- There is no HTTP server so the redirect is compliant
+      redirect = true
+    end 
+    if checks.HTTPS == "COMPLIANT" and checks.Cert == "COMPLIANT" and redirect then
+      https = "COMPLIANT"
+    else
+      https = "FAILED"
+    end
+    local hsts = checks.HSTS
+    local ciphers = checks.Ciphers
+    if https == "COMPLIANT" and hsts == "COMPLIANT" and ciphers == "COMPLIANT" then
+      overall = "COMPLIANT"
+    else
+      overall = "FALIED"
+    end
+
+    table.insert(out, string.format("%s: %s,%s,%s,%s", host, overall, https, hsts, ciphers))
+  end
+  return stdnse.format_output(true, out)
+end
+
+local ActionsTable = {
+  -- portrule: retrieve ssh hostkey
+  portrule = portaction,
+  -- postrule: look for duplicate hosts (same hostkey)
+  postrule = postaction
+}
+
+-- execute the action function corresponding to the current rule
+action = function(...) return ActionsTable[SCRIPT_TYPE](...) end
