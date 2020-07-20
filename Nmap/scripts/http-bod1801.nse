@@ -1096,7 +1096,7 @@ portaction = function(host, port)
           end
       else
           -- This is not a redirect
-          table.insert(output_info.BOD1801_Results, "Redirect: FAILED, not 301/302 redirect: " .. result.status)
+          table.insert(output_info.BOD1801_Results, "Redirect: FAILED, not 301/302 redirect: " .. (result.status or "None"))
           add_value_to_registry(host, "Redirect", "FAILED")
           response = result
           uri = url.parse("https://" .. stdnse.get_hostname(host) .. ":" .. port.number .. path)
