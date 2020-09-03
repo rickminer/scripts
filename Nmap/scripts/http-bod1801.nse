@@ -981,7 +981,8 @@ function handle_redirect(host, port, path, options)
   local counter = 10
   local response, locations
   local u = { host = host, port = port, path = path }
-  local options = {redirect_ok=0}
+  local options = options or {}
+  if not options.redirect_ok then redirect_ok = 0 end
   repeat
     stdnse.debug1(string.format("URL path is %s.", u.path))
     response = http.get(u.host, u.port, u.path, options)
@@ -1043,8 +1044,10 @@ portaction = function(host, port)
     local output_info = {}
     local hostID = host.targetname or host.ip
     local locations = {}
+    local options = {redirect_ok=0, header={}}
+    options['header']['User-Agent'] = 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17'
 
-    result = http.get(host, port, path, {redirect_ok=0})
+    result = http.get(host, port, path, options)
     stdnse.debug1(string.format("Initial request to %s.", url.build({host=stdnse.get_hostname(host), port=port.number, path=path})))
 
     output_info = stdnse.output_table()
@@ -1054,7 +1057,7 @@ portaction = function(host, port)
       table.insert(output_info.BOD1801_Results, "Redirect: UNKNOWN, check HTTP port.")
       add_value_to_registry(host, "HTTPS", "COMPLIANT")
       if tostring( result.status ):match( "30%d" ) and result.header and result.header.location then
-        response =  handle_redirect(host, port, path, {redirect_ok=10})
+        response =  handle_redirect(host, port, path, options)
         local l = response.location
         uri = url.parse(l[#l])
       else
@@ -1070,7 +1073,7 @@ portaction = function(host, port)
       end
       if tostring( result.status ):match( "30%d" ) and result.header and result.header.location then
           -- This is a 30x redirect
-          response = handle_redirect(host, port, path, {redirect_ok=10})
+          response = handle_redirect(host, port, path, options)
           if not (response and response.status) then
               table.insert(output_info.BOD1801_Results, "Redirect: FAILED, redirect failed. Could not connect to " .. result.header.location)
               add_value_to_registry(host, "Redirect", "FAILED")
