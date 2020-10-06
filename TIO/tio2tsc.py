@@ -6,6 +6,7 @@ from tenable.io import TenableIO
 #https://pytenable.readthedocs.io/en/stable/sc.html
 from tenable.sc import TenableSC
 
+#X-Apikeys: accessKey=044365a8a7bb159c5d25230567dd6227cea21f86de4d88dced688f8bd1431918; secretKey=04a19e7db27afe32f039ee19d199fe710c8da88b3b18bddc23bccb7091947ae8;
 tio = TenableIO('044365a8a7bb159c5d25230567dd6227cea21f86de4d88dced688f8bd1431918', '04a19e7db27afe32f039ee19d199fe710c8da88b3b18bddc23bccb7091947ae8')
 
 scans = []

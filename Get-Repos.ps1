@@ -11,6 +11,6 @@ Invoke-WebRequest -URI https://snowman.csp.noaa.gov/rest/token -Method DELETE -U
 $repos | where { $_.name -like "*CyberScope" } | ForEach-Object {
 	$system = (($_.name -split " ")[0] -split "-")[2]
 	$properties = @{'Repository'=$_.name; 'System'=$system; 'ID'=$_.id}
-	$object = New-Object –TypeName PSObject –Prop $properties
+	$object = New-Object -TypeName PSObject -Prop $properties
 	Write-Output $object
 }
