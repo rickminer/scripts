@@ -441,7 +441,7 @@ try {
         $AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($owner,"Read","ContainerInherit,ObjectInherit","None","Allow")
         $acl.SetAccessRule($AccessRule)
         $acl | Set-Acl $ZoomPath
-}
+    }
 }
 
 catch {
