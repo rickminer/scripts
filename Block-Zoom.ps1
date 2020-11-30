@@ -431,11 +431,14 @@ try {
         if( -not (Test-Path $ZoomPath) ) { New-Item -Path $ZoomPath -ItemType Directory }
         # Remove permissions
         $acl = Get-Acl $ZoomPath
+        $owner = $acl.Owner
         # Break inheritance and remove all existing rules. Only the owner can restore.
         $acl.SetAccessRuleProtection($true,$false)
         $AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("BUILTIN\Administrators","FullControl","ContainerInherit,ObjectInherit","None","Allow")
         $acl.SetAccessRule($AccessRule)
         $AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("NT AUTHORITY\SYSTEM","FullControl","ContainerInherit,ObjectInherit","None","Allow")
+        $acl.SetAccessRule($AccessRule)
+        $AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($owner,"Read","ContainerInherit,ObjectInherit","None","Allow")
         $acl.SetAccessRule($AccessRule)
         $acl | Set-Acl $ZoomPath
 }
