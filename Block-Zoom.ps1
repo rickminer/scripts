@@ -438,7 +438,7 @@ try {
         $acl.SetAccessRule($AccessRule)
         $AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("NT AUTHORITY\SYSTEM","FullControl","ContainerInherit,ObjectInherit","None","Allow")
         $acl.SetAccessRule($AccessRule)
-        $AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($owner,"Read","ContainerInherit,ObjectInherit","None","Allow")
+        $AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($owner,"Read,ReadAndExecute","ContainerInherit,ObjectInherit","None","Allow")
         $acl.SetAccessRule($AccessRule)
         $acl | Set-Acl $ZoomPath
 }
