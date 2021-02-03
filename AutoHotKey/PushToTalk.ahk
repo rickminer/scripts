@@ -15,7 +15,7 @@
 
 
 ;This is the mic that is controled
-myMic=6
+myMic=5
 
 
 #SingleInstance, force
